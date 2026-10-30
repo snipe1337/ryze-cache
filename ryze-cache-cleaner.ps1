@@ -16,15 +16,18 @@ function test-admin {
 
 $scriptpath = if ($pscommandpath) { $pscommandpath } else { $myinvocation.mycommand.path }
 if (-not (test-admin)) {
-    if ($scriptpath) {
-        try {
+    try {
+        if ($scriptpath) {
             $forwardargs = @("-nologo", "-noprofile", "-executionpolicy", "bypass", "-file", "`"$scriptpath`"")
             if ($includerecyclebin) { $forwardargs += "-includerecyclebin" }
             if (-not $deep) { $forwardargs += "-deep:`$false" }
             start-process powershell.exe -argumentlist ($forwardargs -join " ") -verb runas -erroraction stop
-        } catch {}
-        exit
-    }
+        } else {
+            $cmd = "irm https://raw.githubusercontent.com/snipe1337/ryze-cache/main/ryze-cache-cleaner.ps1 | iex"
+            start-process powershell.exe -argumentlist "-nologo -noprofile -executionpolicy bypass -command `"$cmd`"" -verb runas -erroraction stop
+        }
+    } catch {}
+    exit
 }
 
 function write-section([string]$text) {
